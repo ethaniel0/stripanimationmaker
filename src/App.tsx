@@ -1,24 +1,22 @@
-import React from 'react';
-import logo from './logo.svg';
+import { useRef, useReducer, useState } from 'react';
 import './App.css';
+import { system, Block } from './components/instances';
+import System from './components/System';
 
 function App() {
+  const [, forceUpdate] = useReducer(x => x + 1, 0);
+  let systemBlock = useRef(new Block(system, () => forceUpdate()));
+  const [selected, setSelected] = useState(0);
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div id="app">
+      <div id="system-box">
+          <System system={systemBlock.current} select={(ind: number) => setSelected(ind)} />
+      </div>
+      <div id="sidebar">
+        <span>Sidebar</span>
+        {systemBlock.current.exportSidebarJSX(selected)}
+      </div>
     </div>
   );
 }
