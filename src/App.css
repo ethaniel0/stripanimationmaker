@@ -4,18 +4,90 @@
     display: flex;
 }
 
-#system-box {
+.strips-box {
+    padding: 1rem;
+    min-width: 15rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.system-box {
     flex-grow: 1;
+    padding: 1rem;
 }
 
 #sidebar {
     padding: 0.5rem 0.5rem;
     background-color: #d3d3d3;
-    width: 15rem;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    gap: 0.5rem;
 }
 
-.block {
+.block-head-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    border: 1.5px solid black;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+}
+.block-head-row.selected {
+    border-color: blue;
+    border-width: 2px;
+}
 
+.block-head {
+    display: inline-flex;
+    gap: 1rem;
+    border: none;
+    background: transparent;
+    user-select: none;
+    outline: none;
+}
+.expand-btn {
+    border: none;
+    background: none;
+    display: grid;
+    place-items: center;
+}
+.expand-btn img {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+.expand-btn.reverse img {
+    transform: rotate(180deg);
+}
+
+.add-btn {
+    margin-top: 1rem;
+    border: none;
+    padding: 0.5rem 1rem;
+}
+.add-btn.Object {
+    background-color: #b6c8f7;
+}
+
+.add-btn.Animation {
+    background-color: #F1CA9C;
+}
+
+.add-btn.Function {
+    background-color: #F19C9C;
+}
+
+.sb-row {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.25rem 0;
+}
+
+.repeat-remove-btn {
+    /* margin-left: 1rem; */
+}
+
+.input-int {
+    width: 3rem;
 }

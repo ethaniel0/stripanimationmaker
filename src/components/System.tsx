@@ -1,14 +1,16 @@
 import { Block } from './instances'
+import BlockItem from './BlockItem';
 
 interface SystemProps {
     system: Block;
     select: (id: number) => void;
+    selected: number
 }
 
-const System = ({system, select}: SystemProps) => {
+const System = ({system, select, selected}: SystemProps) => {
     return (
         <div>
-            {system.exportJSX(select)}
+            <BlockItem block={system} select={select} selected={selected} />
         </div>
     )
 }

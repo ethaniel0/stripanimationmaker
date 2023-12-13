@@ -36,7 +36,14 @@ export interface Value {
 }
 
 export interface Listener {
-    listen: (value: any) => void;
+    listenInner: boolean;
+    listen: (value: any, rerender?: boolean) => void;
+    setListen(obj: Listenable): void;
+    rerender: () => void;
+}
+
+export interface Listenable {
+    addListener: (listener: Listener) => void;
 }
 
 export class Option {
@@ -155,14 +162,14 @@ export var animations: Item[] = [
             });
             // add absolute state transitions
             s += ` ${vars.absoluteStateTransitions.length}`;
-            (vars.absoluteStateTransitions as unknown as [number, number][]).map((i) => {
+            for (let i of (vars.absoluteStateTransitions as unknown as [number, number][])) {
                 s += ` ${i[0]} ${i[1]}`;
-            });
+            };
             // add relative state transitions
             s += ` ${vars.relativeStateTransitions.length}`;
-            (vars.relativeStateTransitions as unknown as [number, number][]).map((i) => {
+            for (let i of (vars.relativeStateTransitions as unknown as [number, number][])) {
                 s += ` ${i[0]} ${i[1]}`;
-            });
+            };
             return s;
         
         },
@@ -188,19 +195,20 @@ export var animations: Item[] = [
             });
             // add next triggers
             s += ` ${vars.nextTriggers.length}`;
-            (vars.nextTriggers as unknown as [number][]).map((i) => {
+            
+            for (let i of (vars.nextTriggers as unknown as [number][])) {
                 s += ` ${i[0]}`;
-            });
+            };
             // add prev triggers
             s += ` ${vars.prevTriggers.length}`;
-            (vars.prevTriggers as unknown as [number][]).map((i) => {
+            for (let i of (vars.prevTriggers as unknown as [number][])) {
                 s += ` ${i[0]}`;
-            });
+            };
             // add reset triggers
             s += ` ${vars.resetTriggers.length}`;
-            (vars.resetTriggers as unknown as [number][]).map((i) => {
+            for (let i of (vars.resetTriggers as unknown as [number][])) {
                 s += ` ${i[0]}`;
-            });
+            };
             return s;
         },
         acceptsInner: [ItemType.ANIMATION],
@@ -224,7 +232,7 @@ export var animations: Item[] = [
         },
         acceptsInner: [ItemType.ANIMATION],
         innerMax: 16
-    }
+    },
 ];
 
 export var objects: Item[] = [
@@ -257,9 +265,9 @@ export var objects: Item[] = [
             } else {
                 let colors: [string][] = vars.colors as unknown as [string][];
                 s += ` ${colors.length}`;
-                colors.map((i) => {
+                for (let i of colors){
                     s += ` ${i[0]}`;
-                });
+                }
             }
 
             // add animations

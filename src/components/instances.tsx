@@ -1,36 +1,254 @@
-import React, { ReactElement } from "react";
 import { ItemType, Value, Option, Listener, List } from "./definitions";
 import * as values from "./values";
 
-function setSelection(e: React.MouseEvent, id: number, select: (id: number) => void){
-    e.stopPropagation();
-    e.preventDefault();
-    select(id);
+export interface BlockDefinition {
+    name: string;
+    symbol: string;
+    type: ItemType;
+    innerTypes: ItemType[];
+    innerMax?: number;
+    innerMin?: number;
+    createVariables: (parent: Block) => Value[];
+}
+
+// Functions
+export var functions: BlockDefinition[] = [
+    // EaseTransform
+    {
+        name: 'Ease',
+        symbol: 'e',
+        type: ItemType.FUNCTION,
+        innerTypes: [],
+        innerMax: 0,
+        innerMin: 0,
+        createVariables: (parent: Block) => {
+            let start = new values.Int("start", 0, parent.rerender);
+            let end = new values.Int("end", 0, parent.rerender);
+            return [start, end];
+        },
+    },
+    {
+        name: 'Linear',
+        symbol: 'l',
+        type: ItemType.FUNCTION,
+        innerTypes: [],
+        innerMax: 0,
+        innerMin: 0,
+        createVariables: (parent: Block) => {
+            let start = new values.Int("start", 0, parent.rerender);
+            let end = new values.Int("end", 0, parent.rerender);
+            return [start, end];
+        },
+    },
+    {
+        name: 'Perlin',
+        symbol: 'p',
+        type: ItemType.FUNCTION,
+        innerTypes: [],
+        innerMax: 0,
+        innerMin: 0,
+        createVariables: (parent: Block) => {
+            let speed = new values.Int("speed", 0, parent.rerender);
+            let min = new values.Int("min", 0, parent.rerender);
+            let max = new values.Int("max", 0, parent.rerender);
+            return [speed, min, max];
+        },
+    },
+    {
+        name: 'Random',
+        symbol: 'r',
+        type: ItemType.FUNCTION,
+        innerTypes: [],
+        innerMax: 0,
+        innerMin: 0,
+        createVariables: (parent: Block) => {
+            let min = new values.Int("min", 0, parent.rerender);
+            let max = new values.Int("max", 0, parent.rerender);
+            return [min, max];
+        },
+    },
+    {
+        name: 'Static',
+        symbol: 's',
+        type: ItemType.FUNCTION,
+        innerTypes: [],
+        innerMax: 0,
+        innerMin: 0,
+        createVariables: (parent: Block) => {
+            let value = new values.Int("value", 0, parent.rerender);
+            return [value];
+        },
+    },
+];
+
+export var animations: BlockDefinition[] = [
+    // BaseAnimation
+    {
+        name: 'Basic Animation',
+        symbol: 'b',
+        type: ItemType.ANIMATION,
+        innerTypes: [ItemType.FUNCTION],
+        innerMax: 16,
+        innerMin: 1,
+        createVariables: (parent: Block) => {
+            let duration = new values.Int("Duration", 0, parent.rerender);
+            let loop = new values.Boolean("Loop", false, parent.rerender);
+            let bind = new values.Select("Bind", [
+                new Option('Position', 'p'),
+                new Option('Relative Position', 'r'),
+                new Option('Colors', 'c'),
+                new Option('Opacity', 'o'),
+                new Option('Brightness', 'b'),
+                new Option('Length', 'l')
+            ], parent.rerender);
+            let frameOffset = new values.Int("Frame Offset", 0, parent.rerender);
+            let bindToLength = new values.Boolean("Bind to Length", false, parent.rerender);
+            let lightOffset = new values.RelyValue("Light Offset", new values.Int("Light Offset", 0, parent.rerender), bindToLength, true, parent.rerender);
+            // let lightOffset = new values.Int("lightOffset", 0, parent.rerender);
+            let absoluteStateTransitions = new values.Repeat("Direct Transitions", [new values.Int("state", 0, parent.rerender), new values.Int("frame", 0, parent.rerender)], parent.rerender);
+            let relativeStateTransitions = new values.Repeat("Relative Transitions", [new values.Int("state", 0, parent.rerender), new values.Int("frame", 0, parent.rerender)], parent.rerender);
+            return [duration, loop, bind, frameOffset, bindToLength, lightOffset, absoluteStateTransitions, relativeStateTransitions];
+        },
+    },
+    // AnimationSequence
+    {
+        name: 'Animation Sequence',
+        symbol: 's',
+        type: ItemType.ANIMATION,
+        innerTypes: [ItemType.ANIMATION],
+        innerMax: 16,
+        innerMin: 1,
+        createVariables: (parent: Block) => {
+            let loops = new values.Int("loops", 0, parent.rerender);
+            let nextTriggers = new values.Repeat("nextTriggers", [new values.Int("state", 0, parent.rerender), new values.Int("frame", 0, parent.rerender)], parent.rerender);
+            let prevTriggers = new values.Repeat("prevTriggers", [new values.Int("state", 0, parent.rerender), new values.Int("frame", 0, parent.rerender)], parent.rerender);
+            let resetTriggers = new values.Repeat("resetTriggers", [new values.Int("state", 0, parent.rerender), new values.Int("frame", 0, parent.rerender)], parent.rerender);
+            return [loops, nextTriggers, prevTriggers, resetTriggers];
+        },
+    },
+    // AnimationStateMap
+    {
+        name: 'State Map',
+        symbol: 'm',
+        type: ItemType.ANIMATION,
+        innerTypes: [ItemType.ANIMATION],
+        innerMax: 16,
+        innerMin: 1,
+        createVariables: (parent: Block) => {
+            let states = new values.LinkLength(
+                "states",
+                [new values.Int("state", 0, parent.rerender)], 
+                parent,
+                parent.rerender
+            );
+            return [states];
+        },
+    },
+    {
+        name: 'Data Reactor',
+        symbol: 'd',
+        type: ItemType.ANIMATION,
+        innerTypes: [ItemType.ANIMATION],
+        innerMax: 1,
+        innerMin: 1,
+        createVariables: (parent: Block) => {
+            let value = new values.Int('Data Index', 0, parent.rerender);
+            return [value];
+        }
+    }
+];
+
+export var objects: BlockDefinition[] = [
+    // LightObject
+    {
+        name: "Standard Object",
+        symbol: "l",
+        type: ItemType.OBJECT,
+        innerTypes: [ItemType.ANIMATION],
+        innerMax: -1,
+        innerMin: 0,
+        createVariables: (parent: Block) => {
+            let position = new values.Position("position", 0, parent.rerender);
+            let persistent = new values.Boolean("persistent", false, parent.rerender);
+            let defineBy = new values.Select("defineBy", [
+                new Option('Length', 'l'),
+                new Option('Colors', 'c')
+            ], parent.rerender);
+            let length = new values.RelyValue("length", new values.Int("length", 0, parent.rerender), defineBy, 'l', parent.rerender);
+
+            let colorRepeat = new values.Repeat('colors', [
+                new values.Color('color', '000000', parent.rerender)
+            ], parent.rerender)
+            let colors = new values.RelyValue("colors", colorRepeat, defineBy, 'c', parent.rerender);
+            return [position, persistent, defineBy, length, colors];
+        }
+    },
+    // Generator
+    {
+        name: "Generator",
+        symbol: 'g',
+        type: ItemType.OBJECT,
+        innerTypes: [ItemType.OBJECT],
+        innerMax: 1,
+        innerMin: 1,
+        createVariables: (parent: Block) => {
+            let position = new values.Position("position", 0, parent.rerender);
+            let spacing = new values.Int("spacing", 0, parent.rerender);
+            return [position, spacing];
+        }
+    }
+];
+
+export var system: BlockDefinition = {
+    name: "System",
+    symbol: "",
+    type: ItemType.SYSTEM,
+    innerTypes: [ItemType.OBJECT],
+    innerMax: -1,
+    innerMin: 0,
+    createVariables: function (parent: Block): Value[] {
+        return []
+    }
 }
 
 export class Block implements List{
     static blockCount: number = 0;
-    identifier: string;
+    symbol: string;
     id: number;
     type: ItemType;
     variables: Value[];
     inner: Block[];
     innerTypes: ItemType[];
     innerMax: number;
+    innerMin: number;
     innerListeners: Listener[];
     length: number = 0;
     rerender: () => void;
+    remove: () => void;
     constructor(def: BlockDefinition, rerender: () => void = () => {}){
-        this.identifier = def.symbol;
+        this.symbol = def.symbol;
         this.id = Block.blockCount;
         Block.blockCount++;
         this.type = def.type;
         this.inner = [];
         this.innerTypes = def.innerTypes;
         this.innerMax = def.innerMax ?? -1;
+        this.innerMin = def.innerMin ?? 0;
         this.innerListeners = [];
-        this.variables = def.createVariables(this);
         this.rerender = rerender;
+        this.variables = def.createVariables(this);
+        this.remove = () => {};
+        for (let i of this.variables){
+            if ('listenInner' in i){
+                // Handle Listener instance
+                (i as unknown as Listener).setListen(this);
+            }
+        }
+
+        for (let i = 0; i < this.innerMin; i++){
+            this.addType(this.innerTypes[0])
+        }
+
     }
     addInner(item: Block){
         if (this.innerMax !== -1 && this.inner.length >= this.innerMax) return;
@@ -45,13 +263,19 @@ export class Block implements List{
     }
     addType(type: ItemType){
         if (type === ItemType.FUNCTION) {
-            this.addInner(new Block(functions[0], this.rerender));
+            let b = new Block(functions[0], this.rerender);
+            b.remove = () => this.removeInner(b);
+            this.addInner(b);
         }
         else if (type === ItemType.ANIMATION) {
-            this.addInner(new Block(animations[0], this.rerender));
+            let b = new Block(animations[0], this.rerender);
+            b.remove = () => this.removeInner(b);
+            this.addInner(b);
         }
         else if (type === ItemType.OBJECT) {
-            this.addInner(new Block(objects[0], this.rerender));
+            let b = new Block(objects[0], this.rerender);
+            b.remove = () => this.removeInner(b);
+            this.addInner(b);
         }
     }
     removeInner(item: Block){
@@ -67,239 +291,26 @@ export class Block implements List{
     addListener(listener: Listener){
         this.innerListeners.push(listener);
     }
-    exportSidebarJSX(selected: number): ReactElement | undefined{
-        if (selected === this.id){
-            return (
-                <>
-                    {this.variables.map((v, ind) => {
-                        return <div key={ind}>{v.exportJSX()}</div>
-                    })}
-                </>
-            );
+    getChild(id: number): Block | null{
+        // console.log('searching for', id);
+        if (id === this.id){
+            return this;
         }
-        return (
-            <>
-                {this.inner.map((i) => {
-                    return i.exportSidebarJSX(selected);
-                })}
-            </>
-        );
-        
+        for (let i = 0; i < this.inner.length; i++){
+            let b = this.inner[i].getChild(id);
+            if (b) return b;
+        }
+        return null;
     }
-    exportJSX(select: (id: number) => void, key?: number){
-        return (
-        <div key={key ?? 1} className="block" onClick={(e) => setSelection(e, this.id, select)}>
-            <span>{this.type}</span>
-
-            <div style={{paddingLeft: '1rem'}}>
-                {
-                    this.inner.map((i, ind) => {
-                        return i.exportJSX(select, ind);
-                    })
-                }
-                {
-                    this.innerTypes.map((t) => {
-                        return (
-                            <button key={t} onClick={() => {
-                                this.addType(t);
-                            }}>
-                                Add {t}
-                            </button>
-                        );
-                    })
-                }
-            </div>
-        </div>);
-    }
-    exportString(){
-        let s = this.identifier;
+    toString(){
+        let s = this.symbol;
         this.variables.forEach((v) => {
             s += ' ' + v.exportString();
         });
-        s += ` ${this.length}`;
+        if (this.innerMax < 0 || this.innerMax > 1) s += ` ${this.length}`;
         this.inner.forEach((i) => {
-            s += ' ' + i.exportString();
+            s += ' ' + i.toString();
         });
-        return s.substring(1);
-    }
-}
-
-interface BlockDefinition {
-    name: string;
-    symbol: string;
-    type: ItemType;
-    innerTypes: ItemType[];
-    innerMax?: number;
-    createVariables: (parent: Block) => Value[];
-}
-
-// Functions
-export var functions: BlockDefinition[] = [
-    // EaseTransform
-    {
-        name: 'Ease',
-        symbol: 'e',
-        type: ItemType.FUNCTION,
-        innerTypes: [],
-        innerMax: 0,
-        createVariables: () => {
-            let start = new values.Int("start", 0);
-            let end = new values.Int("end", 0);
-            return [start, end];
-        },
-    },
-    {
-        name: 'Linear',
-        symbol: 'l',
-        type: ItemType.FUNCTION,
-        innerTypes: [],
-        innerMax: 0,
-        createVariables: () => {
-            let start = new values.Int("start", 0);
-            let end = new values.Int("end", 0);
-            return [start, end];
-        },
-    },
-    {
-        name: 'Perlin',
-        symbol: 'p',
-        type: ItemType.FUNCTION,
-        innerTypes: [],
-        innerMax: 0,
-        createVariables: () => {
-            let speed = new values.Int("speed", 0);
-            let min = new values.Int("min", 0);
-            let max = new values.Int("max", 0);
-            return [speed, min, max];
-        },
-    },
-    {
-        name: 'Random',
-        symbol: 'r',
-        type: ItemType.FUNCTION,
-        innerTypes: [],
-        innerMax: 0,
-        createVariables: () => {
-            let min = new values.Int("min", 0);
-            let max = new values.Int("max", 0);
-            return [min, max];
-        },
-    },
-    {
-        name: 'Static',
-        symbol: 's',
-        type: ItemType.FUNCTION,
-        innerTypes: [],
-        innerMax: 0,
-        createVariables: () => {
-            let value = new values.Int("value", 0);
-            return [value];
-        },
-    },
-];
-
-export var animations: BlockDefinition[] = [
-    // BaseAnimation
-    {
-        name: 'Basic Animation',
-        symbol: 'b',
-        type: ItemType.ANIMATION,
-        innerTypes: [ItemType.FUNCTION],
-        innerMax: 16,
-        createVariables: () => {
-            let duration = new values.Int("duration", 0);
-            let loop = new values.Boolean("loop", false);
-            let bind = new values.Select("bind", [
-                new Option('Position', 'p'),
-                new Option('Relative Position', 'r'),
-                new Option('Colors', 'c'),
-                new Option('Opacity', 'o'),
-                new Option('Brightness', 'b'),
-                new Option('Length', 'l')
-            ]);
-            let frameOffset = new values.Int("frameOffset", 0);
-            let bindToLength = new values.Boolean("bindToLength", false);
-            let lightOffset = new values.Int("lightOffset", 0);
-            let absoluteStateTransitions = new values.Repeat("absoluteStateTransitions", [new values.Int("state", 0), new values.Int("frame", 0)]);
-            let relativeStateTransitions = new values.Repeat("relativeStateTransitions", [new values.Int("state", 0), new values.Int("frame", 0)]);
-            return [duration, loop, bind, frameOffset, bindToLength, lightOffset, absoluteStateTransitions, relativeStateTransitions];
-        },
-    },
-    // AnimationSequence
-    {
-        name: 'Animation Sequence',
-        symbol: 's',
-        type: ItemType.ANIMATION,
-        innerTypes: [ItemType.ANIMATION],
-        innerMax: 16,
-        createVariables: () => {
-            let loops = new values.Int("loops", 0);
-            let nextTriggers = new values.Repeat("nextTriggers", [new values.Int("state", 0), new values.Int("frame", 0)]);
-            let prevTriggers = new values.Repeat("prevTriggers", [new values.Int("state", 0), new values.Int("frame", 0)]);
-            let resetTriggers = new values.Repeat("resetTriggers", [new values.Int("state", 0), new values.Int("frame", 0)]);
-            return [loops, nextTriggers, prevTriggers, resetTriggers];
-        },
-    },
-    // AnimationStateMap
-    {
-        name: 'State Map',
-        symbol: 'm',
-        type: ItemType.ANIMATION,
-        innerTypes: [ItemType.ANIMATION],
-        innerMax: 16,
-        createVariables: (parent: Block) => {
-            let states = new values.LinkLength(
-                "states",
-                [new values.Int("state", 0), new values.Int("animation", 0)], 
-                parent
-            );
-            return [states];
-        },
-    }
-];
-
-export var objects: BlockDefinition[] = [
-    // LightObject
-    {
-        name: "Standard Object",
-        symbol: "l",
-        type: ItemType.OBJECT,
-        innerTypes: [ItemType.ANIMATION],
-        innerMax: -1,
-        createVariables: () => {
-            let position = new values.Position("position", 0);
-            let persistent = new values.Boolean("persistent", false);
-            let defineBy = new values.Select("defineBy", [
-                new Option('Length', 'l'),
-                new Option('Colors', 'c')
-            ]);
-            let length = new values.RelyValue("length", new values.Int("length", 0), defineBy, 'l');
-            let colors = new values.RelyValue("colors", new values.Color("color", '000000'), defineBy, 'c');
-            return [position, persistent, defineBy, length, colors];
-        }
-    },
-    // Generator
-    {
-        name: "Generator",
-        symbol: 'g',
-        type: ItemType.OBJECT,
-        innerTypes: [ItemType.OBJECT],
-        innerMax: 1,
-        createVariables: () => {
-            let position = new values.Position("position", 0);
-            let spacing = new values.Int("spacing", 0);
-            return [position, spacing];
-        }
-    }
-];
-
-export var system: BlockDefinition = {
-    name: "System",
-    symbol: "",
-    type: ItemType.SYSTEM,
-    innerTypes: [ItemType.OBJECT],
-    innerMax: -1,
-    createVariables: function (parent: Block): Value[] {
-        return []
+        return s;
     }
 }
