@@ -1,14 +1,16 @@
 import { useRef, useReducer, useState } from 'react';
 import './App.css';
-import { system, Block } from './components/instances';
-import System from './components/System';
-import Sidebar from './components/Sidebar';
 import 'react-reflex/styles.css'
 import {
   ReflexContainer,
   ReflexSplitter,
   ReflexElement
 } from 'react-reflex'
+
+import { system, Block } from './components/instances';
+import System from './components/System';
+import Sidebar from './components/Sidebar';
+import Strips from './components/Strips';
 
 function App() {
   const [, forceUpdate] = useReducer(x => x + 1, 0);
@@ -27,7 +29,7 @@ function App() {
     <div id="app">
       <ReflexContainer orientation="vertical" style={{width: '100%'}}>
         <ReflexElement className="left-pane strips-box">
-          Something here
+          <Strips />
         </ReflexElement>
 
         <ReflexSplitter/>

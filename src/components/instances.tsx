@@ -101,13 +101,17 @@ export var animations: BlockDefinition[] = [
                 new Option('Brightness', 'b'),
                 new Option('Length', 'l')
             ], parent.rerender);
-            let frameOffset = new values.Int("Frame Offset", 0, parent.rerender);
+
+            let updateFrames = new values.Boolean("Update Frames", true, parent.rerender);
+
             let bindToLength = new values.Boolean("Bind to Length", false, parent.rerender);
-            let lightOffset = new values.RelyValue("Light Offset", new values.Int("Light Offset", 0, parent.rerender), bindToLength, true, parent.rerender);
+            let frameOffset = new values.Int("Frame Offset", 0, parent.rerender);
+            let lightOffset = new values.RelyValue("Light Offset", new values.Int("Light Offset", 1, parent.rerender), bindToLength, true, parent.rerender);
+            
             // let lightOffset = new values.Int("lightOffset", 0, parent.rerender);
             let absoluteStateTransitions = new values.Repeat("Direct Transitions", [new values.Int("state", 0, parent.rerender), new values.Int("frame", 0, parent.rerender)], parent.rerender);
             let relativeStateTransitions = new values.Repeat("Relative Transitions", [new values.Int("state", 0, parent.rerender), new values.Int("frame", 0, parent.rerender)], parent.rerender);
-            return [duration, loop, bind, frameOffset, bindToLength, lightOffset, absoluteStateTransitions, relativeStateTransitions];
+            return [duration, loop, bind, updateFrames, bindToLength, frameOffset, lightOffset, absoluteStateTransitions, relativeStateTransitions];
         },
     },
     // AnimationSequence
@@ -144,6 +148,7 @@ export var animations: BlockDefinition[] = [
             return [states];
         },
     },
+    // DataReactor
     {
         name: 'Data Reactor',
         symbol: 'd',
@@ -180,7 +185,17 @@ export var objects: BlockDefinition[] = [
                 new values.Color('color', '000000', parent.rerender)
             ], parent.rerender)
             let colors = new values.RelyValue("colors", colorRepeat, defineBy, 'c', parent.rerender);
-            return [position, persistent, defineBy, length, colors];
+
+            let usePath = new values.Boolean("use path", false, parent.rerender);
+            let loopPath = new values.RelyValue("loop path", new values.Boolean("loop path", false, parent.rerender), usePath, true, parent.rerender);
+            let path = new values.RelyValue("path", 
+                    new values.Repeat("path", [
+                        new values.Int("start", 0, parent.rerender),
+                        new values.Int("end", 0, parent.rerender),
+                    ], parent.rerender), 
+                usePath, true, parent.rerender);
+
+            return [position, persistent, defineBy, length, colors, usePath, loopPath, path];
         }
     },
     // Generator
@@ -195,6 +210,34 @@ export var objects: BlockDefinition[] = [
             let position = new values.Position("position", 0, parent.rerender);
             let spacing = new values.Int("spacing", 0, parent.rerender);
             return [position, spacing];
+        }
+    },
+    // ObjectGroup
+    {
+        name: "Object Group",
+        symbol: 'o',
+        type: ItemType.OBJECT,
+        innerTypes: [ItemType.OBJECT],
+        createVariables: (parent: Block) => {
+            return [];
+        }
+    },
+    // ObjectGroupStateMap
+    {
+        name: "Object Group State Map",
+        symbol: 'm',
+        type: ItemType.OBJECT,
+        innerTypes: [ItemType.OBJECT],
+        innerMax: 16,
+        innerMin: 1,
+        createVariables: (parent: Block) => {
+            let states = new values.LinkLength(
+                "states",
+                [new values.Int("state", 0, parent.rerender)], 
+                parent,
+                parent.rerender
+            );
+            return [states];
         }
     }
 ];

@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 #app {
     width: 100vw;
     height: 100vh;
@@ -9,6 +13,10 @@
     min-width: 15rem;
     display: flex;
     flex-direction: column;
+}
+#strips-playground {
+    background: lightgray;
+    flex-grow: 1;
 }
 
 .system-box {
@@ -64,7 +72,7 @@
 .add-btn {
     margin-top: 1rem;
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.3rem 1rem;
 }
 .add-btn.Object {
     background-color: #b6c8f7;
