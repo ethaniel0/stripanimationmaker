@@ -170,44 +170,6 @@ export class Select implements Value, Listenable {
     }
 }
 
-export class String implements Value, Listenable {
-    name: string;
-    type: string;
-    value: string;
-    active: boolean;
-    listeners: Listener[];
-    constructor(name: string, value: string) {
-        this.name = name;
-        this.type = 'string';
-        this.value = value;
-        this.active = true;
-        this.listeners = [];
-    }
-    exportJSX() {
-        if (!this.active) return <></>;
-        return (
-            <div className='sb-row'>
-                <span>{this.name}</span>
-                <input onChange={e => this.set(e.target.value)} type="text" value={this.value} />
-            </div>
-        );
-    }
-    exportString() {
-        if (!this.active) return "";
-        return this.value.toString();
-    }
-    clone(){
-        return new String(this.name, this.value);
-    }
-    set(value: string){
-        this.value = value;
-        this.listeners.forEach((v) => v.listen(this));
-    }
-    addListener(value: Listener){
-        this.listeners.push(value);
-    }
-}
-
 export class Color implements Value, Listenable {
     type: string;
     value: string;

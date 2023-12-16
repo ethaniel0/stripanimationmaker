@@ -35,7 +35,7 @@ function setBlockValue(block: Block, e: React.ChangeEvent<HTMLSelectElement>){
     block.symbol = b.symbol;
     block.variables = b.variables;
     block.inner = b.inner;
-    block.innerTypes = b.innerTypes;
+    block.innerType = b.innerType;
     block.innerMax = b.innerMax;
     block.innerListeners = b.innerListeners;
     block.length = b.length;
@@ -103,14 +103,12 @@ const BlockItem = ({block, select, selected}: BlockItemProps) => {
                     <div>...</div>
                 }
                 {
-                    (block.innerMax === -1 || block.inner.length < block.innerMax) && expanded && 
-                    block.innerTypes.map((t) => {
-                        return (
-                            <button key={t} className={'add-btn ' + t} onClick={() => block.addType(t)} >
-                                + {t}
-                            </button>
-                        );
-                    })
+                    (block.innerMax === -1 || block.inner.length < block.innerMax) && expanded && block.innerType != ItemType.NONE &&
+
+                    <button key={block.innerType} className={'add-btn ' + block.innerType} onClick={() => block.addType(block.innerType)} >
+                        + {block.innerType}
+                    </button>
+                    
                 }
             </div>
         </div>

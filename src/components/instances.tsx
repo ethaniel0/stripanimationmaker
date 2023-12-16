@@ -5,7 +5,7 @@ export interface BlockDefinition {
     name: string;
     symbol: string;
     type: ItemType;
-    innerTypes: ItemType[];
+    innerType: ItemType;
     innerMax?: number;
     innerMin?: number;
     createVariables: (parent: Block) => Value[];
@@ -18,7 +18,7 @@ export var functions: BlockDefinition[] = [
         name: 'Ease',
         symbol: 'e',
         type: ItemType.FUNCTION,
-        innerTypes: [],
+        innerType: ItemType.NONE,
         innerMax: 0,
         innerMin: 0,
         createVariables: (parent: Block) => {
@@ -31,7 +31,7 @@ export var functions: BlockDefinition[] = [
         name: 'Linear',
         symbol: 'l',
         type: ItemType.FUNCTION,
-        innerTypes: [],
+        innerType: ItemType.NONE,
         innerMax: 0,
         innerMin: 0,
         createVariables: (parent: Block) => {
@@ -44,7 +44,7 @@ export var functions: BlockDefinition[] = [
         name: 'Perlin',
         symbol: 'p',
         type: ItemType.FUNCTION,
-        innerTypes: [],
+        innerType: ItemType.NONE,
         innerMax: 0,
         innerMin: 0,
         createVariables: (parent: Block) => {
@@ -58,7 +58,7 @@ export var functions: BlockDefinition[] = [
         name: 'Random',
         symbol: 'r',
         type: ItemType.FUNCTION,
-        innerTypes: [],
+        innerType: ItemType.NONE,
         innerMax: 0,
         innerMin: 0,
         createVariables: (parent: Block) => {
@@ -71,7 +71,7 @@ export var functions: BlockDefinition[] = [
         name: 'Static',
         symbol: 's',
         type: ItemType.FUNCTION,
-        innerTypes: [],
+        innerType: ItemType.NONE,
         innerMax: 0,
         innerMin: 0,
         createVariables: (parent: Block) => {
@@ -87,7 +87,7 @@ export var animations: BlockDefinition[] = [
         name: 'Basic Animation',
         symbol: 'b',
         type: ItemType.ANIMATION,
-        innerTypes: [ItemType.FUNCTION],
+        innerType: ItemType.FUNCTION,
         innerMax: 16,
         innerMin: 1,
         createVariables: (parent: Block) => {
@@ -119,7 +119,7 @@ export var animations: BlockDefinition[] = [
         name: 'Animation Sequence',
         symbol: 's',
         type: ItemType.ANIMATION,
-        innerTypes: [ItemType.ANIMATION],
+        innerType: ItemType.ANIMATION,
         innerMax: 16,
         innerMin: 1,
         createVariables: (parent: Block) => {
@@ -135,7 +135,7 @@ export var animations: BlockDefinition[] = [
         name: 'State Map',
         symbol: 'm',
         type: ItemType.ANIMATION,
-        innerTypes: [ItemType.ANIMATION],
+        innerType: ItemType.ANIMATION,
         innerMax: 16,
         innerMin: 1,
         createVariables: (parent: Block) => {
@@ -153,7 +153,7 @@ export var animations: BlockDefinition[] = [
         name: 'Data Reactor',
         symbol: 'd',
         type: ItemType.ANIMATION,
-        innerTypes: [ItemType.ANIMATION],
+        innerType: ItemType.ANIMATION,
         innerMax: 1,
         innerMin: 1,
         createVariables: (parent: Block) => {
@@ -169,7 +169,7 @@ export var objects: BlockDefinition[] = [
         name: "Standard Object",
         symbol: "l",
         type: ItemType.OBJECT,
-        innerTypes: [ItemType.ANIMATION],
+        innerType: ItemType.ANIMATION,
         innerMax: -1,
         innerMin: 0,
         createVariables: (parent: Block) => {
@@ -203,7 +203,7 @@ export var objects: BlockDefinition[] = [
         name: "Generator",
         symbol: 'g',
         type: ItemType.OBJECT,
-        innerTypes: [ItemType.OBJECT],
+        innerType: ItemType.OBJECT,
         innerMax: 1,
         innerMin: 1,
         createVariables: (parent: Block) => {
@@ -217,7 +217,7 @@ export var objects: BlockDefinition[] = [
         name: "Object Group",
         symbol: 'o',
         type: ItemType.OBJECT,
-        innerTypes: [ItemType.OBJECT],
+        innerType: ItemType.OBJECT,
         createVariables: (parent: Block) => {
             return [];
         }
@@ -227,7 +227,7 @@ export var objects: BlockDefinition[] = [
         name: "Object Group State Map",
         symbol: 'm',
         type: ItemType.OBJECT,
-        innerTypes: [ItemType.OBJECT],
+        innerType: ItemType.OBJECT,
         innerMax: 16,
         innerMin: 1,
         createVariables: (parent: Block) => {
@@ -246,7 +246,7 @@ export var system: BlockDefinition = {
     name: "System",
     symbol: "",
     type: ItemType.SYSTEM,
-    innerTypes: [ItemType.OBJECT],
+    innerType: ItemType.OBJECT,
     innerMax: -1,
     innerMin: 0,
     createVariables: function (parent: Block): Value[] {
@@ -261,7 +261,7 @@ export class Block implements List{
     type: ItemType;
     variables: Value[];
     inner: Block[];
-    innerTypes: ItemType[];
+    innerType: ItemType;
     innerMax: number;
     innerMin: number;
     innerListeners: Listener[];
@@ -274,7 +274,7 @@ export class Block implements List{
         Block.blockCount++;
         this.type = def.type;
         this.inner = [];
-        this.innerTypes = def.innerTypes;
+        this.innerType = def.innerType;
         this.innerMax = def.innerMax ?? -1;
         this.innerMin = def.innerMin ?? 0;
         this.innerListeners = [];
@@ -289,13 +289,13 @@ export class Block implements List{
         }
 
         for (let i = 0; i < this.innerMin; i++){
-            this.addType(this.innerTypes[0])
+            this.addType(this.innerType)
         }
 
     }
     addInner(item: Block){
         if (this.innerMax !== -1 && this.inner.length >= this.innerMax) return;
-        if (!this.innerTypes.includes(item.type)) return;
+        if (this.innerType != item.type) return;
         item.rerender = this.rerender;
         this.inner.push(item);
         this.length++;

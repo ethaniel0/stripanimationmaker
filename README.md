@@ -1,46 +1,112 @@
-# Getting Started with Create React App
+# Strip Animation Maker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is still a work in progress. To run the project, clone the repository and run `npm install` in the project directory. Then run `npm start` to start the development server.
 
-## Available Scripts
+## How To Use
 
-In the project directory, you can run:
+This is a primitive block editor - this later may be changed.
 
-### `npm start`
+There are three types of blocks - objects, animations, and functions. Each may have child blocks, but not all do. In general, objects will have animations as children, and animations will have functions as children. The type of child available will be the only type presented, automatically.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+The sidebar holds any variables associated with the block. This can be related to position, size, color, etc.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+To export, press the `export` button. Currently, since the strip editor isn't implemented, this export is incomplete. The full system will be as such:
 
-### `npm test`
+> "\<# of strips\> \<strip1 length\> \<strip2 length\> ... \<export\>"
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+So if the system has two LED strips of length 10 and 20, the export will be:
 
-### `npm run build`
+> "2 10 20 ...export"
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The export itself starts with the number of objects, and then the definitions for each object, like so: \<# objects> \<obj1 def> \<obj2 def> ...
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+So if you want to add a suncle object in the c++ code, copy the text after the number for each of the objects, and use `systemCreator.parseObject` on it.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Augmentation
 
-### `npm run eject`
+If you want to add a new block type, as of right now you must add to the source code, and the definition must go into the `objects`, `animations`, or `functions` arrays in `src/components/instances.txt`. As this is in typescript, a block obejct looks like this:
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```ts
+interface BlockDefinition {
+    name: string;
+    symbol: string;
+    type: ItemType;
+    innerType: ItemType;
+    innerMax?: number;
+    innerMin?: number;
+    createVariables: (parent: Block) => Value[];
+}
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The name will be what is shown in the block dropdown, and the symbol will be the _**single character**_ added to the export string to distinguish the block type. The type is the type of the block, and the innerType is the type of the child block it can contain. 
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+If the block has a variable number of children, the innerMax and innerMin are the maximum and minimum number of children, respectively.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+The createVariables function will create the variables necessary, and will return an array of them _in order_ so the export can occur properly.
 
-## Learn More
+The variables types are as included (and are included in `/src/components/values.tsx`):
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Int (name: str, value: number, rerender: () => void)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- An integer.
+- name: the name that will be displayed in the sidebar
+- value: the default value. 
+- rerender: the rerender function. Pass in the parent.rerender function.
+
+Position (name: str, value: number, rerrerender: () => voidender)
+
+- A position on the strip.
+- Same as an Int. In the future, will render differently to allow the user to select a point on a strip.
+
+Boolean (name: str, value: boolean, rerender: () => void)
+
+- A boolean.
+- name: the name that will be displayed in the sidebar
+- value: the default value (true or false). 
+- rerender: the rerender function. Pass in the parent.rerender function.
+
+Select (name: str, value: Option[], rerererender: () => voidnder)
+
+- A dropdown of options. Often compined with RelyValue (see below)
+- name: the name that will be displayed in the sidebar
+- value: a list of options, defined as {name: str, value: any}. The name is what will be displayed in the dropdown, and the value is what will be exported.
+- rerender: the rerender function. Pass in the parent.rerender function.
+
+Color (name: str, value: string, rerender: () => void)
+
+- name: the name that will be displayed in the sidebar
+- value: the default value, as hex (no #).
+- rerender: the rerender function. Pass in the parent.rerender function.
+
+
+Repeat (name: str, value: Value[], rerender: () => void)
+
+- A list of values that can appear more than once, such as a list of colors
+- name: the name that will be displayed in the sidebar
+- value: a group of values that will be repeated every time the user adds another row or removed when the user subtracts a row.
+- rerender: the rerender function. Pass in the parent.rerender function.
+
+LinkLength (name: string, values: Value[], link: List, rerender: () => void)
+
+- Like a repeat, but it binds the number of value groups to the length of another value (such as a Repeat or the number of children of the block)
+- name: the name that will be displayed in the sidebar
+- value: the group of values that will be repeated
+- link: the value that will determine the number of value groups
+- rerender: the rerender function. Pass in the parent.rerender function.
+
+Rely (name: string, value: Value, link: Value, rerender: () => void)
+
+- conditionally includes the linked value, based on id the link is currently being shown (the linked value could be hidden by a RelyValue, for intance)
+- name: the name that will be displayed in the sidebar
+- value: the value that will be shown if the link is shown
+- link: the value that will determine if the value is shown
+- rerender: the rerender function. Pass in the parent.rerender function.
+
+RelyValue (name: string, value: Value, link: Value, wantedValue: any, rerender: () => void)
+
+- conditionally includes the linked value, based on if the link is equal to a certain value
+- name: the name that will be displayed in the sidebar
+- value: the value that will be shown if the link is shown
+- link: the value that will determine if the value is shown
+- wantedValue: the value that the link must be equal to for the value to be shown
+- rerender: the rerender function. Pass in the parent.rerender function.

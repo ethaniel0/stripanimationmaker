@@ -4,7 +4,8 @@ export enum ItemType {
     SYSTEM = "System",
     OBJECT = "Object",
     ANIMATION = "Animation",
-    FUNCTION = "Function"
+    FUNCTION = "Function",
+    NONE = "None"
 }
 
 export enum ObjectProperties {
